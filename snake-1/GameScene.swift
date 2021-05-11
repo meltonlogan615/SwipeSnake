@@ -37,24 +37,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       scoreLabel.text = "Score: \(score)"
     }
   }
+  // for use later when adding user defaults to keep track of high scores
+  var highScore = 0
   
   // Swipe vars
   var startSwipe: CGPoint!
   var endSwipe: CGPoint!
   
-  // scene view sizes && borders
-  var gameBorder: SKSpriteNode!
-  //let playableArea = SKScene()
-  
+  // End Game Labels
+  var gameOverLabel: SKLabelNode!
+  var finalScoreLabel: SKLabelNode!
   
   
   override func didMove(to view: SKView) {
+    
+    // world settings
     scene?.scaleMode = .aspectFit
     physicsWorld.gravity = .zero
     physicsWorld.contactDelegate = self
-    startNewGame()
     
-    scoreLabel = SKLabelNode(fontNamed: "Arial")
+    // score display settings
+    scoreLabel = SKLabelNode(fontNamed: "Courier")
     scoreLabel.text = "Score: 0"
     scoreLabel.fontSize = 16
     scoreLabel.horizontalAlignmentMode = .left
@@ -62,6 +65,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     scoreLabel.zPosition = 2
     addChild(scoreLabel)
     
+    startNewGame()
   }
   
   //MARK: - Put a ring on it 🪐
@@ -143,7 +147,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     {
       food = SKSpriteNode(color: .red, size: CGSize(width: 20, height: 20))
       food.name = "food"
-      food.position = CGPoint(x: Int.random(in: 20...Int(view.frame.width - 20)), y: Int.random(in: 60...Int(view.frame.height - 60)))
+      food.position = CGPoint(x: Int.random(in: 20...Int(view.frame.width - 20)), y: Int.random(in: 65...Int(view.frame.height - 65)))
       food.physicsBody = SKPhysicsBody(rectangleOf: food.size)
       food.physicsBody?.contactTestBitMask = 1
       food.physicsBody?.angularVelocity = 2
@@ -161,6 +165,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   //MARK: - Change Direction ⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️
+  //TODO: - Once there are multiple snake segments, this will need to be updated to where if swipe direction is the inverse of current direction, it is rendered invalid and the player must make 90deg turns to get to their destination
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let start = touches.first else { return }
     startSwipe = start.location(in: self)
@@ -183,24 +188,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         snakeSegment.physicsBody?.velocity = CGVector(dx: 0, dy: 30 * snakeSpeedMultiplier)
       }
     }
-    
   }
   
-  // MARK: - Contact Detection - Totally stolen from @twostraws
+  // MARK: - Collision-Contact Detection - Totally stolen from @twostraws
   // Source: https://www.hackingwithswift.com/read/11/5/collision-detection-skphysicscontactdelegate
   func collisionBetween(snake: SKNode, object: SKNode) {
     if object.name == "food" {
-      food.removeFromParent()
-      foodCount -= 1
-      foodEaten += 1
-      snakeSpeedMultiplier += 0.15
-      score += 20
-      makeFood()
+      eatFood()
     } else if object.name == "gameBoard" || object.name == "snake" {
-      snake.physicsBody?.isDynamic = false
-      food.physicsBody?.angularVelocity = 0
-      isGameOver = true
-      timer?.invalidate()
+      endGame()
     }
   }
   
@@ -211,6 +207,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       collisionBetween(snake: contact.bodyB.node!, object: contact.bodyA.node!)
     }
     print("BOOM!!!")
+  }
+  
+  func eatFood() {
+    food.removeFromParent()
+    foodCount -= 1
+    foodEaten += 1
+    snakeSpeedMultiplier = 0.15
+    score += 20
+    makeFood()
+  }
+  
+  // TODO: - Create End Game Method
+  func endGame() {
+    isGameOver = true
+    timer?.invalidate()
+    snakeSegment.physicsBody?.isDynamic = false
+    food.physicsBody?.angularVelocity = 0
+    
+    // Game Over Label
+    gameOverLabel = SKLabelNode(fontNamed: "Courier")
+    gameOverLabel.text = "Game Over"
+    gameOverLabel.fontSize = 48
+    gameOverLabel.horizontalAlignmentMode = .center
+    gameOverLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2)
+    gameOverLabel.zPosition = 2
+    addChild(gameOverLabel)
+    
+    // Final Score Label
+    finalScoreLabel = SKLabelNode(fontNamed: "Courier")
+    finalScoreLabel.text = "Final Score: \(score)"
+    finalScoreLabel.fontSize = 24
+    finalScoreLabel.horizontalAlignmentMode = .center
+    finalScoreLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2 - 50)
+    finalScoreLabel.zPosition = 2
+    addChild(finalScoreLabel)
+    
+    // add button to trigger startNewGame() and dismiss two previous labels
     
   }
   

@@ -37,16 +37,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       scoreLabel.text = "Score: \(score)"
     }
   }
-
+  
   // Swipe vars
   var startSwipe: CGPoint!
   var endSwipe: CGPoint!
-
+  
   // scene view sizes && borders
   var gameBorder: SKSpriteNode!
   //let playableArea = SKScene()
   
-
+  
   
   override func didMove(to view: SKView) {
     scene?.scaleMode = .aspectFit
@@ -58,45 +58,46 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     scoreLabel.text = "Score: 0"
     scoreLabel.fontSize = 16
     scoreLabel.horizontalAlignmentMode = .left
-    scoreLabel.position = CGPoint(x: view.frame.width / 8, y: view.frame.height / 8)
+    scoreLabel.position = CGPoint(x: 12, y: 55)
     scoreLabel.zPosition = 2
     addChild(scoreLabel)
     
   }
   
-  //MARK: - Put a ring on it
+  //MARK: - Put a ring on it 🪐
   func makeGameBoard() {
     guard let view = view else { return }
-
+    
     let topGameBorder = SKSpriteNode(color: .white, size: CGSize(width: view.frame.width, height: 5))
     topGameBorder.name = "gameBoard"
     topGameBorder.physicsBody = SKPhysicsBody(rectangleOf: topGameBorder.size)
     topGameBorder.physicsBody?.isDynamic = false
     topGameBorder.physicsBody?.contactTestBitMask = 2
     topGameBorder.position = CGPoint(x: view.frame.width / 2, y: view.frame.maxY - 45)
-    print("Top X = \(topGameBorder.position.x) \n Top Y = \(topGameBorder.position.y)")
     addChild(topGameBorder)
-
-    let leftGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height))
+    
+    let leftGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height - 90))
+    leftGameBorder.name = "gameBoard"
     leftGameBorder.physicsBody = SKPhysicsBody(rectangleOf: leftGameBorder.size)
     leftGameBorder.physicsBody?.isDynamic = false
     leftGameBorder.physicsBody?.contactTestBitMask = 2
-    leftGameBorder.position = CGPoint(x: 0, y: view.frame.height / 2 - 40)
+    leftGameBorder.position = CGPoint(x: 0, y: view.frame.height / 2 )
     addChild(leftGameBorder)
     
-    let rightGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height))
+    let rightGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height - 90))
     rightGameBorder.name = "gameBoard"
     rightGameBorder.physicsBody = SKPhysicsBody(rectangleOf: rightGameBorder.size)
     rightGameBorder.physicsBody?.isDynamic = false
     rightGameBorder.physicsBody?.contactTestBitMask = 2
-    rightGameBorder.position = CGPoint(x: view.frame.maxX, y: view.frame.height / 2 - 40)
+    rightGameBorder.position = CGPoint(x: view.frame.maxX, y: view.frame.height / 2)
     addChild(rightGameBorder)
     
     let bottomGameBorder = SKSpriteNode(color: .white, size: CGSize(width: view.frame.width, height: 5))
+    bottomGameBorder.name = "gameBoard"
     bottomGameBorder.physicsBody = SKPhysicsBody(rectangleOf: bottomGameBorder.size)
     bottomGameBorder.physicsBody?.isDynamic = false
     bottomGameBorder.physicsBody?.contactTestBitMask = 2
-    bottomGameBorder.position = CGPoint(x: view.frame.width / 2, y: 35)
+    bottomGameBorder.position = CGPoint(x: view.frame.width / 2, y: 45)
     addChild(bottomGameBorder)
   }
   
@@ -108,7 +109,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     score += 1
   }
   
-  //MARK: - Snake Maker
+  //MARK: - Shake Yer Snake Maker 🐍
   func makeNewSnake() {
     guard let view = view else { return }
     snakeSegment = SKSpriteNode(color: .cyan, size: CGSize(width: 20, height: 20))
@@ -132,21 +133,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     snakeSegment.physicsBody?.angularDamping = 0
     
     addChild(snakeSegment)
+    
   }
   
-  //MARK: - Kitchen Time
+  //MARK: - Kitchen Time 🥞
   func makeFood() {
     guard let view = view else { return }
     if !isGameOver && foodCount < 1
     {
       food = SKSpriteNode(color: .red, size: CGSize(width: 20, height: 20))
       food.name = "food"
-      food.position = CGPoint(x: Int.random(in: 1...Int(view.frame.width - 10)), y: Int.random(in: 10...Int(view.frame.height - 10)))
+      food.position = CGPoint(x: Int.random(in: 20...Int(view.frame.width - 20)), y: Int.random(in: 60...Int(view.frame.height - 60)))
       food.physicsBody = SKPhysicsBody(rectangleOf: food.size)
       food.physicsBody?.contactTestBitMask = 1
       food.physicsBody?.angularVelocity = 2
       foodCount += 1
-      print(food.position)
       addChild(food)
     }
   }
@@ -159,7 +160,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     startTimer()
   }
   
-  //MARK: - Change Direction
+  //MARK: - Change Direction ⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let start = touches.first else { return }
     startSwipe = start.location(in: self)
@@ -185,28 +186,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
   }
   
-  
-  
-  // MARK: - Contact Detection
-  func didBegin(_ contact: SKPhysicsContact) {
-    print("BOOM!!!")
-    food.removeFromParent()
-    foodCount -= 1
-    foodEaten += 1
-    snakeSpeedMultiplier += 0.15
-    score += 20
-    makeFood()
+  // MARK: - Contact Detection - Totally stolen from @twostraws
+  // Source: https://www.hackingwithswift.com/read/11/5/collision-detection-skphysicscontactdelegate
+  func collisionBetween(snake: SKNode, object: SKNode) {
+    if object.name == "food" {
+      food.removeFromParent()
+      foodCount -= 1
+      foodEaten += 1
+      snakeSpeedMultiplier += 0.15
+      score += 20
+      makeFood()
+    } else if object.name == "gameBoard" || object.name == "snake" {
+      snake.physicsBody?.isDynamic = false
+      food.physicsBody?.angularVelocity = 0
+      isGameOver = true
+      timer?.invalidate()
+    }
   }
   
+  func didBegin(_ contact: SKPhysicsContact) {
+    if contact.bodyA.node!.name == "snake" {
+      collisionBetween(snake: contact.bodyA.node!, object: contact.bodyB.node!)
+    } else if contact.bodyB.node!.name == "snake" {
+      collisionBetween(snake: contact.bodyB.node!, object: contact.bodyA.node!)
+    }
+    print("BOOM!!!")
+    
+  }
   
-  
-  
-  /*
-   Other things. Set the rate of speed of the snake based on the timer.
-   increase speed slowly as the snake gets longer
-   moveSnake() changes the positions of the snakeSegments by one
-   changeDirection() swipe gestures to change the direction of the snake
-   
-   */
 }
 

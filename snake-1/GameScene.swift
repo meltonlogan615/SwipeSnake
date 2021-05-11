@@ -47,6 +47,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   // End Game Labels
   var gameOverLabel: SKLabelNode!
   var finalScoreLabel: SKLabelNode!
+  var newGameLabel: SKLabelNode!
   
   
   override func didMove(to view: SKView) {
@@ -56,14 +57,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     physicsWorld.gravity = .zero
     physicsWorld.contactDelegate = self
     
-    // score display settings
-    scoreLabel = SKLabelNode(fontNamed: "Courier")
-    scoreLabel.text = "Score: 0"
-    scoreLabel.fontSize = 16
-    scoreLabel.horizontalAlignmentMode = .left
-    scoreLabel.position = CGPoint(x: 12, y: 55)
-    scoreLabel.zPosition = 2
-    addChild(scoreLabel)
+
     
     startNewGame()
   }
@@ -150,7 +144,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       food.position = CGPoint(x: Int.random(in: 20...Int(view.frame.width - 20)), y: Int.random(in: 65...Int(view.frame.height - 65)))
       food.physicsBody = SKPhysicsBody(rectangleOf: food.size)
       food.physicsBody?.contactTestBitMask = 1
-      food.physicsBody?.angularVelocity = 2
+      food.physicsBody?.angularVelocity = 3
+      food.physicsBody?.angularDamping = 0
       foodCount += 1
       addChild(food)
     }
@@ -158,6 +153,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   //MARK: - Game Creation
   func startNewGame() {
+    foodCount = 0
+    isGameOver = false
+    removeAllChildren()
+    addScoreLabel()
     makeGameBoard()
     makeNewSnake()
     makeFood()
@@ -169,6 +168,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let start = touches.first else { return }
     startSwipe = start.location(in: self)
+    for touch in touches {
+      let location = touch.location(in: self)
+      let touchedNode = atPoint(location)
+      if touchedNode.name == "New Game" {
+        score = 0
+        startNewGame()
+      }
+    }
   }
   
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -189,6 +196,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       }
     }
   }
+    
   
   // MARK: - Collision-Contact Detection - Totally stolen from @twostraws
   // Source: https://www.hackingwithswift.com/read/11/5/collision-detection-skphysicscontactdelegate
@@ -213,7 +221,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     food.removeFromParent()
     foodCount -= 1
     foodEaten += 1
-    snakeSpeedMultiplier = 0.15
+    snakeSpeedMultiplier += 0.15
     score += 20
     makeFood()
   }
@@ -243,8 +251,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     finalScoreLabel.zPosition = 2
     addChild(finalScoreLabel)
     
-    // add button to trigger startNewGame() and dismiss two previous labels
+    // add button to trigger startNewGame() and dismiss two previous labels, closure?
+    newGameLabel = SKLabelNode(fontNamed: "Courier")
+    newGameLabel.text = "New Game"
+    newGameLabel.name = "New Game"
+    newGameLabel.fontSize = 24
+    newGameLabel.horizontalAlignmentMode = .center
+    newGameLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2 - 100)
+    newGameLabel.zPosition = 2
+    addChild(newGameLabel)
+    // add button to show high scores
     
+    }
+  
+  // MARK: - Score Label
+  func addScoreLabel() {
+    // score display settings
+    
+    scoreLabel = SKLabelNode(fontNamed: "Courier")
+    scoreLabel.text = "Score: 0"
+    scoreLabel.fontSize = 16
+    scoreLabel.horizontalAlignmentMode = .left
+    scoreLabel.position = CGPoint(x: 12, y: 55)
+    scoreLabel.zPosition = 2
+    addChild(scoreLabel)
   }
   
 }

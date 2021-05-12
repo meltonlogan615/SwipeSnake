@@ -7,22 +7,13 @@
 
 import SpriteKit
 
-enum Collisions: UInt32 {
-  case snakeSegment = 1
-  case food = 2
-  case wall = 4
-}
-
 class GameScene: SKScene, SKPhysicsContactDelegate {
   
   // game basics
   var timer: Timer?
   var isGameOver = false
   
-  // food
-  var food: SKSpriteNode!
-  var foodCount = 0
-  var foodEaten = 0
+  var food = Food()
   
   // snake
   var snakeSegment: SKSpriteNode!
@@ -51,7 +42,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   
   override func didMove(to view: SKView) {
-    
+    food.name = food.foodName
     // world settings
     scene?.scaleMode = .aspectFit
     physicsWorld.gravity = .zero
@@ -137,23 +128,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   //MARK: - Kitchen Time 🥞
   func makeFood() {
     guard let view = view else { return }
-    if !isGameOver && foodCount < 1
-    {
-      food = SKSpriteNode(color: .red, size: CGSize(width: 20, height: 20))
-      food.name = "food"
+    if !isGameOver && food.countActive < 1 {
       food.position = CGPoint(x: Int.random(in: 20...Int(view.frame.width - 20)), y: Int.random(in: 65...Int(view.frame.height - 65)))
-      food.physicsBody = SKPhysicsBody(rectangleOf: food.size)
-      food.physicsBody?.contactTestBitMask = 1
-      food.physicsBody?.angularVelocity = 3
-      food.physicsBody?.angularDamping = 0
-      foodCount += 1
+      food.countActive += 1
       addChild(food)
     }
   }
   
   //MARK: - Game Creation
   func startNewGame() {
-    foodCount = 0
+    food.countActive = 0
     isGameOver = false
     removeAllChildren()
     addScoreLabel()
@@ -202,7 +186,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   // Source: https://www.hackingwithswift.com/read/11/5/collision-detection-skphysicscontactdelegate
   func collisionBetween(snake: SKNode, object: SKNode) {
     if object.name == "food" {
-      eatFood()
+      food.eatFood()
+      snakeSpeedMultiplier += 0.15
+      score += 20
+      makeFood()
+      
     } else if object.name == "gameBoard" || object.name == "snake" {
       endGame()
     }
@@ -217,21 +205,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     print("BOOM!!!")
   }
   
-  func eatFood() {
-    food.removeFromParent()
-    foodCount -= 1
-    foodEaten += 1
-    snakeSpeedMultiplier += 0.15
-    score += 20
-    makeFood()
-  }
   
   // TODO: - Create End Game Method
   func endGame() {
     isGameOver = true
     timer?.invalidate()
     snakeSegment.physicsBody?.isDynamic = false
-    food.physicsBody?.angularVelocity = 0
     
     // Game Over Label
     gameOverLabel = SKLabelNode(fontNamed: "Courier")
@@ -251,7 +230,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     finalScoreLabel.zPosition = 2
     addChild(finalScoreLabel)
     
-    // add button to trigger startNewGame() and dismiss two previous labels, closure?
+    // add button to trigger startNewGame() and dismiss all end game labels
     newGameLabel = SKLabelNode(fontNamed: "Courier")
     newGameLabel.text = "New Game"
     newGameLabel.name = "New Game"
@@ -260,14 +239,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     newGameLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2 - 100)
     newGameLabel.zPosition = 2
     addChild(newGameLabel)
-    // add button to show high scores
+    // TODO: - add button to show high scores
     
     }
   
   // MARK: - Score Label
   func addScoreLabel() {
-    // score display settings
-    
     scoreLabel = SKLabelNode(fontNamed: "Courier")
     scoreLabel.text = "Score: 0"
     scoreLabel.fontSize = 16

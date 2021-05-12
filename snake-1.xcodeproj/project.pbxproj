@@ -65,15 +65,23 @@
 				53663A51263D1E6200ADF6C1 /* AppDelegate.swift */,
 				53663A53263D1E6300ADF6C1 /* GameScene.sks */,
 				53663A57263D1E6300ADF6C1 /* GameScene.swift */,
-				53FD6F27264A9F0700FC2C21 /* Food.swift */,
-				534D5973263F123D00BD6A88 /* Snake.swift */,
-				53663A68263DF2BE00ADF6C1 /* Move.swift */,
+				53BB01F7264C87F900D23E71 /* Models */,
 				53663A59263D1E6300ADF6C1 /* GameViewController.swift */,
 				53663A5B263D1E6300ADF6C1 /* Main.storyboard */,
 				53663A5E263D1E6400ADF6C1 /* Assets.xcassets */,
 				53663A60263D1E6400ADF6C1 /* Info.plist */,
 			);
 			path = "snake-1";
+			sourceTree = "<group>";
+		};
+		53BB01F7264C87F900D23E71 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				53663A68263DF2BE00ADF6C1 /* Move.swift */,
+				534D5973263F123D00BD6A88 /* Snake.swift */,
+				53FD6F27264A9F0700FC2C21 /* Food.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

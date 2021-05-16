@@ -8,7 +8,7 @@
 import Foundation
 import SpriteKit
 
-let view = GameScene()
+//let view = GameScene()
 
 class Food: SKSpriteNode {
   let foodName:          String = "food"
@@ -22,6 +22,7 @@ class Food: SKSpriteNode {
   
   init() {
     super.init(texture: nil, color: UIColor(cgColor: foodColor), size: foodSize)
+    self.name = foodName
     self.physicsBody = SKPhysicsBody(rectangleOf: self.size)
     self.physicsBody?.angularVelocity = foodSpin
     self.physicsBody?.angularDamping = foodDecreaseSpin
@@ -33,7 +34,7 @@ class Food: SKSpriteNode {
   
   func eatFood() {
     self.removeFromParent()
-    countActive -= 1
-    countEaten  += 1
+    self.countActive -= 1
+    self.countEaten  += 1
   }
 }

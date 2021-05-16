@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BV1-FR-VrT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qYe-ae-Q9e">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
@@ -8,16 +8,60 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Start Game View Controller-->
+        <scene sceneID="gKT-u5-rbX">
+            <objects>
+                <viewController id="qYe-ae-Q9e" customClass="StartGameViewController" customModule="snake_1" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="aWm-yg-SPK">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g0I-D7-lcZ">
+                                <rect key="frame" x="20" y="272" width="374" height="0.0"/>
+                                <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="42"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vvy-Wt-wsn">
+                                <rect key="frame" x="20" y="433" width="374" height="36"/>
+                                <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="24"/>
+                                <state key="normal" title="Start Game"/>
+                                <connections>
+                                    <action selector="startGameButtonPressed:" destination="qYe-ae-Q9e" eventType="touchUpInside" id="7No-Ef-SrK"/>
+                                    <segue destination="BV1-FR-VrT" kind="show" identifier="startGame" id="N26-So-Ox5"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vqO-hM-90a"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="g0I-D7-lcZ" firstAttribute="top" secondItem="vqO-hM-90a" secondAttribute="top" constant="228" id="24B-mm-KTW"/>
+                            <constraint firstItem="g0I-D7-lcZ" firstAttribute="leading" secondItem="vqO-hM-90a" secondAttribute="leading" constant="20" id="6Hg-1n-tff"/>
+                            <constraint firstItem="vqO-hM-90a" firstAttribute="trailing" secondItem="Vvy-Wt-wsn" secondAttribute="trailing" constant="20" id="KOw-sd-p69"/>
+                            <constraint firstItem="vqO-hM-90a" firstAttribute="trailing" secondItem="g0I-D7-lcZ" secondAttribute="trailing" constant="20" id="OoJ-vn-uDi"/>
+                            <constraint firstItem="Vvy-Wt-wsn" firstAttribute="centerY" secondItem="aWm-yg-SPK" secondAttribute="centerY" constant="3" id="UV0-iv-5Ec"/>
+                            <constraint firstItem="Vvy-Wt-wsn" firstAttribute="leading" secondItem="vqO-hM-90a" secondAttribute="leading" constant="20" id="bED-Nu-wGE"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="gameTitleLabel" destination="g0I-D7-lcZ" id="6vg-PT-rlN"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9J2-FL-Jmc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-816" y="40"/>
+        </scene>
         <!--Game View Controller-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="GameViewController" customModule="snake_1" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController wantsFullScreenLayout="YES" modalTransitionStyle="crossDissolve" modalPresentationStyle="fullScreen" id="BV1-FR-VrT" customClass="GameViewController" customModule="snake_1" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3se-qz-xqx" customClass="SKView">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="4qk-I5-YsI"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <navigationItem key="navigationItem" id="x9r-fQ-o0R"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
             </objects>

@@ -13,21 +13,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var timer: Timer?
   var isGameOver = false
   
+  // game nodes
   var food = Food()
-  
-  // snake
-  var snakeSegment: SKSpriteNode!
-  var fullSnake: [SKSpriteNode]!
-  var snakeSpeedMultiplier = 1.0
-  var snakeCurrentVelocity: CGVector!
+  var snake = Snake()
+  var currentDirection: CGVector!
+  var fullSnake: FullSnake!
   
   // scoring
-  var scoreLabel: SKLabelNode!
+  let scoreLabel = Score()
   var score = 0 {
     didSet {
       scoreLabel.text = "Score: \(score)"
     }
   }
+  
   // for use later when adding user defaults to keep track of high scores
   var highScore = 0
   
@@ -36,57 +35,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var endSwipe: CGPoint!
   
   // End Game Labels
-  var gameOverLabel: SKLabelNode!
-  var finalScoreLabel: SKLabelNode!
-  var newGameLabel: SKLabelNode!
+  let gameOverLabel = GameOver()
+  let finalScoreLabel = FinalScore()
+  let newGameLabel = NewGame()
   
   
   override func didMove(to view: SKView) {
-    food.name = food.foodName
     // world settings
     scene?.scaleMode = .aspectFit
     physicsWorld.gravity = .zero
     physicsWorld.contactDelegate = self
-    
-
-    
     startNewGame()
   }
   
   //MARK: - Put a ring on it 🪐
   func makeGameBoard() {
     guard let view = view else { return }
-    
-    let topGameBorder = SKSpriteNode(color: .white, size: CGSize(width: view.frame.width, height: 5))
-    topGameBorder.name = "gameBoard"
+    let topGameBorderSize = CGSize(width: view.frame.width, height: 5)
+    let topGameBorder = SKSpriteNode(color: .white, size: topGameBorderSize)
+    topGameBorder.position = CGPoint(x: view.frame.width / 2, y: view.frame.maxY - 45)
     topGameBorder.physicsBody = SKPhysicsBody(rectangleOf: topGameBorder.size)
+    topGameBorder.name = "gameBoard"
     topGameBorder.physicsBody?.isDynamic = false
     topGameBorder.physicsBody?.contactTestBitMask = 2
-    topGameBorder.position = CGPoint(x: view.frame.width / 2, y: view.frame.maxY - 45)
     addChild(topGameBorder)
     
-    let leftGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height - 90))
-    leftGameBorder.name = "gameBoard"
+    let leftGameBorderSize = CGSize(width: 10, height: view.frame.height - 90)
+    let leftGameBorder = SKSpriteNode(color: .white, size: leftGameBorderSize)
+    leftGameBorder.position = CGPoint(x: 0, y: view.frame.height / 2 )
     leftGameBorder.physicsBody = SKPhysicsBody(rectangleOf: leftGameBorder.size)
+    leftGameBorder.name = "gameBoard"
     leftGameBorder.physicsBody?.isDynamic = false
     leftGameBorder.physicsBody?.contactTestBitMask = 2
-    leftGameBorder.position = CGPoint(x: 0, y: view.frame.height / 2 )
     addChild(leftGameBorder)
     
-    let rightGameBorder = SKSpriteNode(color: .white, size: CGSize(width: 10, height: view.frame.height - 90))
+    let rightBorderSize = CGSize(width: 10, height: view.frame.height - 90)
+    let rightGameBorder = SKSpriteNode(color: .white, size: rightBorderSize)
+    rightGameBorder.position = CGPoint(x: view.frame.maxX, y: view.frame.height / 2)
     rightGameBorder.name = "gameBoard"
     rightGameBorder.physicsBody = SKPhysicsBody(rectangleOf: rightGameBorder.size)
     rightGameBorder.physicsBody?.isDynamic = false
     rightGameBorder.physicsBody?.contactTestBitMask = 2
-    rightGameBorder.position = CGPoint(x: view.frame.maxX, y: view.frame.height / 2)
     addChild(rightGameBorder)
     
-    let bottomGameBorder = SKSpriteNode(color: .white, size: CGSize(width: view.frame.width, height: 5))
+    let bottomBorderSize = CGSize(width: view.frame.width, height: 5)
+    let bottomGameBorder = SKSpriteNode(color: .white, size: bottomBorderSize)
+    bottomGameBorder.position = CGPoint(x: view.frame.width / 2, y: 45)
     bottomGameBorder.name = "gameBoard"
     bottomGameBorder.physicsBody = SKPhysicsBody(rectangleOf: bottomGameBorder.size)
     bottomGameBorder.physicsBody?.isDynamic = false
     bottomGameBorder.physicsBody?.contactTestBitMask = 2
-    bottomGameBorder.position = CGPoint(x: view.frame.width / 2, y: 45)
     addChild(bottomGameBorder)
   }
   
@@ -96,32 +94,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   @objc func increaseScore() {
     score += 1
+    snake.speedMultiplier += 0.01
   }
   
   //MARK: - Shake Yer Snake Maker 🐍
   func makeNewSnake() {
     guard let view = view else { return }
-    snakeSegment = SKSpriteNode(color: .cyan, size: CGSize(width: 20, height: 20))
-    snakeSegment.name = "snake"
-    snakeSegment.position = CGPoint(x: Int.random(in: 50...Int(view.frame.width - 50)), y: Int.random(in: 50...Int(view.frame.height - 50)))
-    snakeSegment.physicsBody = SKPhysicsBody(rectangleOf: snakeSegment.size)
-    snakeSegment.physicsBody?.contactTestBitMask = 1
-    snakeSegment.physicsBody?.restitution = 1.0
-    snakeSegment.physicsBody?.allowsRotation = false
-    snakeSegment.physicsBody?.isDynamic = true
     
-    // sets the initial direction of snake movement based on initial start position
-    if snakeSegment.position.x >= view.frame.width / 2 {
-      snakeCurrentVelocity = CGVector(dx: -(30 * snakeSpeedMultiplier), dy: 0)
-      snakeSegment.physicsBody?.velocity = snakeCurrentVelocity
-    } else if snakeSegment.position.x < view.frame.width / 2 {
-      snakeCurrentVelocity = CGVector(dx: 30 * snakeSpeedMultiplier, dy: 0)
-      snakeSegment.physicsBody?.velocity = snakeCurrentVelocity
+    snake.position = CGPoint(x: Int.random(in: 50...Int(view.frame.width - 50)), y: Int.random(in: 50...Int(view.frame.height - 50)))
+
+    if snake.position.x >= view.frame.width / 2 {
+      snake.currentVelocity = CGVector(dx: -(30 * snake.speedMultiplier), dy: 0)
+      snake.physicsBody?.velocity = snake.currentVelocity
+    } else if snake.position.x < view.frame.width / 2 {
+      snake.currentVelocity = CGVector(dx: 30 * snake.speedMultiplier, dy: 0)
+      snake.physicsBody?.velocity = snake.currentVelocity
     }
-    snakeSegment.physicsBody?.linearDamping = 0
-    snakeSegment.physicsBody?.angularDamping = 0
-    
-    addChild(snakeSegment)
+    addChild(snake)
+  }
+  
+  func extendSnake() {
     
   }
   
@@ -143,6 +135,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addScoreLabel()
     makeGameBoard()
     makeNewSnake()
+    snake.physicsBody?.isDynamic = true
     makeFood()
     startTimer()
   }
@@ -168,15 +161,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     if abs(startSwipe.x - endSwipe.x) > abs(startSwipe.y - endSwipe.y) {
       if startSwipe.x > endSwipe.x {
-        snakeSegment.physicsBody?.velocity = CGVector(dx: -30 * snakeSpeedMultiplier, dy: 0)
+        snake.physicsBody?.velocity = CGVector(dx: -30 * snake.speedMultiplier, dy: 0)
       } else if startSwipe.x < endSwipe.x {
-        snakeSegment.physicsBody?.velocity = CGVector(dx: 30 * snakeSpeedMultiplier, dy: 0)
+        snake.physicsBody?.velocity = CGVector(dx: 30 * snake.speedMultiplier, dy: 0)
       }
     } else if abs(startSwipe.x - endSwipe.x) < abs(startSwipe.y - endSwipe.y) {
       if startSwipe.y > endSwipe.y {
-        snakeSegment.physicsBody?.velocity = CGVector(dx: 0, dy: -30 * snakeSpeedMultiplier)
+        snake.physicsBody?.velocity = CGVector(dx: 0, dy: -30 * snake.speedMultiplier)
       } else if startSwipe.y < endSwipe.y {
-        snakeSegment.physicsBody?.velocity = CGVector(dx: 0, dy: 30 * snakeSpeedMultiplier)
+        snake.physicsBody?.velocity = CGVector(dx: 0, dy: 30 * snake.speedMultiplier)
       }
     }
   }
@@ -184,10 +177,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   // MARK: - Collision-Contact Detection - Totally stolen from @twostraws
   // Source: https://www.hackingwithswift.com/read/11/5/collision-detection-skphysicscontactdelegate
-  func collisionBetween(snake: SKNode, object: SKNode) {
+  func collisionBetween(hungrySnake: SKNode, object: SKNode) {
     if object.name == "food" {
       food.eatFood()
-      snakeSpeedMultiplier += 0.15
+      snake.speedMultiplier += 0.15
       score += 20
       makeFood()
       
@@ -198,9 +191,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func didBegin(_ contact: SKPhysicsContact) {
     if contact.bodyA.node!.name == "snake" {
-      collisionBetween(snake: contact.bodyA.node!, object: contact.bodyB.node!)
+      collisionBetween(hungrySnake: contact.bodyA.node!, object: contact.bodyB.node!)
     } else if contact.bodyB.node!.name == "snake" {
-      collisionBetween(snake: contact.bodyB.node!, object: contact.bodyA.node!)
+      collisionBetween(hungrySnake: contact.bodyB.node!, object: contact.bodyA.node!)
     }
     print("BOOM!!!")
   }
@@ -208,36 +201,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   // TODO: - Create End Game Method
   func endGame() {
+    guard let view = view else { return }
     isGameOver = true
     timer?.invalidate()
-    snakeSegment.physicsBody?.isDynamic = false
+    snake.physicsBody?.isDynamic = false
     
     // Game Over Label
-    gameOverLabel = SKLabelNode(fontNamed: "Courier")
-    gameOverLabel.text = "Game Over"
-    gameOverLabel.fontSize = 48
-    gameOverLabel.horizontalAlignmentMode = .center
-    gameOverLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2)
-    gameOverLabel.zPosition = 2
+    gameOverLabel.position = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
     addChild(gameOverLabel)
     
     // Final Score Label
-    finalScoreLabel = SKLabelNode(fontNamed: "Courier")
     finalScoreLabel.text = "Final Score: \(score)"
-    finalScoreLabel.fontSize = 24
-    finalScoreLabel.horizontalAlignmentMode = .center
-    finalScoreLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2 - 50)
-    finalScoreLabel.zPosition = 2
+    finalScoreLabel.position = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2 - 50)
     addChild(finalScoreLabel)
     
-    // add button to trigger startNewGame() and dismiss all end game labels
-    newGameLabel = SKLabelNode(fontNamed: "Courier")
-    newGameLabel.text = "New Game"
-    newGameLabel.name = "New Game"
-    newGameLabel.fontSize = 24
-    newGameLabel.horizontalAlignmentMode = .center
-    newGameLabel.position = CGPoint(x: (view?.frame.width)! / 2, y: (view?.frame.height)! / 2 - 100)
-    newGameLabel.zPosition = 2
+    newGameLabel.position = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2 - 100)
     addChild(newGameLabel)
     // TODO: - add button to show high scores
     
@@ -245,14 +223,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   // MARK: - Score Label
   func addScoreLabel() {
-    scoreLabel = SKLabelNode(fontNamed: "Courier")
-    scoreLabel.text = "Score: 0"
-    scoreLabel.fontSize = 16
-    scoreLabel.horizontalAlignmentMode = .left
-    scoreLabel.position = CGPoint(x: 12, y: 55)
-    scoreLabel.zPosition = 2
     addChild(scoreLabel)
   }
-  
 }
 

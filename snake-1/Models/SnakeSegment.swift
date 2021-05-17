@@ -8,7 +8,7 @@
 import Foundation
 import SpriteKit
 
-class Snake: SKSpriteNode {
+class SnakeSegment: SKSpriteNode {
   var snakeName:        String = "snake"
   var segmentColor:    CGColor = UIColor.cyan.cgColor
   var segmentSize:      CGSize = CGSize(width: 20, height: 20)

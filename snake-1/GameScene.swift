@@ -15,9 +15,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   // game nodes
   var food = Food()
-  var snake = Snake()
+  var snake = SnakeSegment()
+  var completeSnake: FullSnake!
   var currentDirection: CGVector!
-  var fullSnake: FullSnake!
+  var snakeCurrentPosition: CGPoint!
   
   // scoring
   let scoreLabel = Score()
@@ -102,7 +103,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard let view = view else { return }
     
     snake.position = CGPoint(x: Int.random(in: 50...Int(view.frame.width - 50)), y: Int.random(in: 50...Int(view.frame.height - 50)))
-
+    snakeCurrentPosition = snake.position
     if snake.position.x >= view.frame.width / 2 {
       snake.currentVelocity = CGVector(dx: -(30 * snake.speedMultiplier), dy: 0)
       snake.physicsBody?.velocity = snake.currentVelocity
@@ -110,12 +111,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       snake.currentVelocity = CGVector(dx: 30 * snake.speedMultiplier, dy: 0)
       snake.physicsBody?.velocity = snake.currentVelocity
     }
-    addChild(snake)
+    completeSnake = FullSnake(allSegments: [snake])
+    completeSnake.allSegments.append(snake)
+    addChild(completeSnake.allSegments[0])
   }
   
+  // Add
   func extendSnake() {
-    
+    let newSnakeSegment = SnakeSegment()
+    newSnakeSegment.position = CGPoint(x: CGFloat(completeSnake.allSegments[0].position.x - 20), y: CGFloat(completeSnake.allSegments[0].position.y))
+    completeSnake.allSegments.append(newSnakeSegment)
+    addChild(completeSnake.allSegments.last!)
   }
+  
   
   //MARK: - Kitchen Time 🥞
   func makeFood() {
@@ -161,15 +169,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     if abs(startSwipe.x - endSwipe.x) > abs(startSwipe.y - endSwipe.y) {
       if startSwipe.x > endSwipe.x {
-        snake.physicsBody?.velocity = CGVector(dx: -30 * snake.speedMultiplier, dy: 0)
+        for i in 0..<completeSnake.allSegments.count {
+          completeSnake.allSegments[i].physicsBody?.velocity = CGVector(dx: -30 * snake.speedMultiplier, dy: 0)
+        }
+        
       } else if startSwipe.x < endSwipe.x {
-        snake.physicsBody?.velocity = CGVector(dx: 30 * snake.speedMultiplier, dy: 0)
+        for i in 0..<completeSnake.allSegments.count {
+          completeSnake.allSegments[i].physicsBody?.velocity = CGVector(dx: 30 * snake.speedMultiplier, dy: 0)
+        }
       }
     } else if abs(startSwipe.x - endSwipe.x) < abs(startSwipe.y - endSwipe.y) {
       if startSwipe.y > endSwipe.y {
-        snake.physicsBody?.velocity = CGVector(dx: 0, dy: -30 * snake.speedMultiplier)
+        for i in 0..<completeSnake.allSegments.count {
+          completeSnake.allSegments[i].physicsBody?.velocity = CGVector(dx: 0, dy: -30 * snake.speedMultiplier)
+        }
       } else if startSwipe.y < endSwipe.y {
-        snake.physicsBody?.velocity = CGVector(dx: 0, dy: 30 * snake.speedMultiplier)
+        for i in 0..<completeSnake.allSegments.count {
+          completeSnake.allSegments[i].physicsBody?.velocity = CGVector(dx: 0, dy: 30 * snake.speedMultiplier)
+        }
       }
     }
   }
@@ -182,9 +199,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       food.eatFood()
       snake.speedMultiplier += 0.15
       score += 20
+      extendSnake()
       makeFood()
-      
-    } else if object.name == "gameBoard" || object.name == "snake" {
+    } else if object.name == "gameBoard"  {
       endGame()
     }
   }

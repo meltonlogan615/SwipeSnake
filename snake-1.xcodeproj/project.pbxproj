@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		534D5974263F123D00BD6A88 /* Snake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 534D5973263F123D00BD6A88 /* Snake.swift */; };
+		534D5974263F123D00BD6A88 /* SnakeSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 534D5973263F123D00BD6A88 /* SnakeSegment.swift */; };
 		53663A52263D1E6200ADF6C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53663A51263D1E6200ADF6C1 /* AppDelegate.swift */; };
 		53663A54263D1E6300ADF6C1 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 53663A53263D1E6300ADF6C1 /* GameScene.sks */; };
 		53663A58263D1E6300ADF6C1 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53663A57263D1E6300ADF6C1 /* GameScene.swift */; };
@@ -24,7 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		534D5973263F123D00BD6A88 /* Snake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snake.swift; sourceTree = "<group>"; };
+		534D5973263F123D00BD6A88 /* SnakeSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnakeSegment.swift; sourceTree = "<group>"; };
 		53663A4E263D1E6200ADF6C1 /* snake-1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "snake-1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		53663A51263D1E6200ADF6C1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		53663A53263D1E6300ADF6C1 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -91,7 +91,7 @@
 				53FD6F27264A9F0700FC2C21 /* Food.swift */,
 				53BB01F8264D41C900D23E71 /* Labels.swift */,
 				53BB01FA264D42E100D23E71 /* Borders.swift */,
-				534D5973263F123D00BD6A88 /* Snake.swift */,
+				534D5973263F123D00BD6A88 /* SnakeSegment.swift */,
 				53BB01FC264E9BB000D23E71 /* FullSnake.swift */,
 				53BB01FE264ED6E100D23E71 /* HighScores.swift */,
 			);
@@ -181,7 +181,7 @@
 				53BB01FB264D42E100D23E71 /* Borders.swift in Sources */,
 				53BB01FF264ED6E100D23E71 /* HighScores.swift in Sources */,
 				53663A58263D1E6300ADF6C1 /* GameScene.swift in Sources */,
-				534D5974263F123D00BD6A88 /* Snake.swift in Sources */,
+				534D5974263F123D00BD6A88 /* SnakeSegment.swift in Sources */,
 				53BB01F9264D41C900D23E71 /* Labels.swift in Sources */,
 				53BB02022650A06400D23E71 /* StartGameViewController.swift in Sources */,
 				53BB01FD264E9BB000D23E71 /* FullSnake.swift in Sources */,

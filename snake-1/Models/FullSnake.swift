@@ -6,8 +6,8 @@
 //
 
 import Foundation
-//import SpriteKit
+import SpriteKit
 
 struct FullSnake {
-  var allSegments: [Snake]
+  var allSegments: [SnakeSegment]
 }

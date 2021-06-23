@@ -11,7 +11,6 @@ import SpriteKit
 //let view = GameScene()
 
 class Food: SKSpriteNode {
-  let foodName:          String = "food"
   var countActive:          Int = 0
   var countEaten:           Int = 0
   var foodColor:        CGColor = UIColor.red.cgColor
@@ -22,8 +21,14 @@ class Food: SKSpriteNode {
   
   init() {
     super.init(texture: nil, color: UIColor(cgColor: foodColor), size: foodSize)
-    self.name = foodName
+    self.name = "food"
+    
     self.physicsBody = SKPhysicsBody(rectangleOf: self.size)
+    
+//    self.physicsBody?.categoryBitMask = PhysicsCategories.food
+    self.physicsBody?.contactTestBitMask = PhysicsCategories.snake
+//    self.physicsBody?.collisionBitMask = PhysicsCategories.none
+    
     self.physicsBody?.angularVelocity = foodSpin
     self.physicsBody?.angularDamping = foodDecreaseSpin
   }

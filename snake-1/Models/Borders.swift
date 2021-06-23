@@ -8,19 +8,20 @@
 import Foundation
 import SpriteKit
 
-let view = SKView.self
-
 class Border: SKSpriteNode {
-  var borderSize = CGSize(width: 5, height: 5)
-  var borderName: String = "gameBoard"
-  var borderWidth: CGFloat!
-  var borderHeight: CGFloat!
+  let borderSize = CGSize(width: 5, height: 5)
   
   init() {
-    super.init(texture: nil, color: .white, size: borderSize)
+    super.init(texture: nil, color: .white, size: self.borderSize)
+    self.name = "border"
+    
     self.physicsBody = SKPhysicsBody(rectangleOf: self.borderSize)
-    self.physicsBody?.isDynamic = false
+    
+//    self.physicsBody?.categoryBitMask = PhysicsCategories.border
     self.physicsBody?.contactTestBitMask = 2
+//    self.physicsBody?.collisionBitMask = PhysicsCategories.none
+    
+    self.physicsBody?.isDynamic = false
   }
   
   required init?(coder aDecoder: NSCoder) {

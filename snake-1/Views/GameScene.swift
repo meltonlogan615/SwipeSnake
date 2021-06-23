@@ -20,7 +20,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var snakeSegmentPosition: Int!
   var completeSnake: FullSnake!
   var currentDirection: CGVector!
-  var snakeCurrentPosition: CGPoint!
   var snakePositions = [CGPoint]()
   
   // scoring
@@ -32,7 +31,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   // for use later when adding user defaults to keep track of high scores
-  var highScore = 0
+  var highScores = HighScores(topTen: [])
   
   // Swipe vars
   var startSwipe: CGPoint!
@@ -42,7 +41,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   let gameOverLabel = GameOver()
   let finalScoreLabel = FinalScore()
   let newGameLabel = NewGame()
+  let topScoresLabel = TopScores()
   
+//  override func sceneDidLoad() {
+//    print("poop")
+//  }
   
   override func didMove(to view: SKView) {
     // world settings
@@ -54,57 +57,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   //MARK: - Put a ring on it 🪐
   func makeGameBoard() {
     guard let scene = scene else { return }
-    let topGameBorderSize = CGSize(width: scene.frame.width, height: 10)
-    let topGameBorder = SKSpriteNode(color: .white, size: topGameBorderSize)
-    topGameBorder.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.maxY)
-    topGameBorder.physicsBody = SKPhysicsBody(rectangleOf: topGameBorder.size)
-    topGameBorder.name = "gameBoard"
-    topGameBorder.physicsBody?.isDynamic = false
-    topGameBorder.physicsBody?.contactTestBitMask = 2
-    addChild(topGameBorder)
     
-    let leftGameBorderSize = CGSize(width: 10, height: scene.frame.height)
-    let leftGameBorder = SKSpriteNode(color: .white, size: leftGameBorderSize)
-    leftGameBorder.position = CGPoint(x: 0, y: scene.frame.height / 2 )
-    leftGameBorder.physicsBody = SKPhysicsBody(rectangleOf: leftGameBorder.size)
-    leftGameBorder.name = "gameBoard"
-    leftGameBorder.physicsBody?.isDynamic = false
-    leftGameBorder.physicsBody?.contactTestBitMask = 2
-    addChild(leftGameBorder)
+    let topBorder = Border()
+    topBorder.size = CGSize(width: scene.frame.width, height: 10)
+    topBorder.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.maxY)
+    addChild(topBorder)
     
-    let rightBorderSize = CGSize(width: 10, height: scene.frame.height)
-    let rightGameBorder = SKSpriteNode(color: .white, size: rightBorderSize)
-    rightGameBorder.position = CGPoint(x: scene.frame.maxX, y: scene.frame.height / 2)
-    rightGameBorder.name = "gameBoard"
-    rightGameBorder.physicsBody = SKPhysicsBody(rectangleOf: rightGameBorder.size)
-    rightGameBorder.physicsBody?.isDynamic = false
-    rightGameBorder.physicsBody?.contactTestBitMask = 2
-    addChild(rightGameBorder)
+    let rightBorder = Border()
+    rightBorder.size = CGSize(width: 10, height: scene.frame.height)
+    rightBorder.position = CGPoint(x: scene.frame.maxX, y: scene.frame.height / 2)
+    addChild(rightBorder)
     
-    let bottomBorderSize = CGSize(width: scene.frame.width, height: 10)
-    let bottomGameBorder = SKSpriteNode(color: .white, size: bottomBorderSize)
-    bottomGameBorder.position = CGPoint(x: scene.frame.width / 2, y: 0)
-    bottomGameBorder.name = "gameBoard"
-    bottomGameBorder.physicsBody = SKPhysicsBody(rectangleOf: bottomGameBorder.size)
-    bottomGameBorder.physicsBody?.isDynamic = false
-    bottomGameBorder.physicsBody?.contactTestBitMask = 2
-    addChild(bottomGameBorder)
+    let bottomBorder = Border()
+    bottomBorder.size = CGSize(width: scene.frame.width, height: 10)
+    bottomBorder.position = CGPoint(x: scene.frame.width / 2, y: 0)
+    addChild(bottomBorder)
+    
+    let leftBorder = Border()
+    leftBorder.size = CGSize(width: 10, height: scene.frame.height)
+    leftBorder.position = CGPoint(x: 0, y: scene.frame.height / 2 )
+    leftBorder.name = "border"
+    addChild(leftBorder)
   }
   
   func startTimer() {
-    timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(increaseScore), userInfo: nil, repeats: true)
+    timer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(increaseScore), userInfo: nil, repeats: true)
   }
   
   @objc func increaseScore() {
-    score += 1
-//    snake.speedMultiplier += 0.01
+    score -= 1
   }
   
   //MARK: - Shake Yer Snake Maker 🐍
   func makeNewSnake() {
     guard let scene = scene else { return }
     snake.position = CGPoint(x: Int.random(in: 20...Int(scene.frame.width - 20)), y: Int.random(in: 20...Int(scene.frame.height - 20)))
-    snakeCurrentPosition = snake.position
+
     // sets the initial direction of the new snake
     if snake.position.x >= scene.frame.width / 2 {
       snake.currentVelocity = CGVector(dx: -(30 * snake.speedMultiplier), dy: 0)
@@ -123,9 +111,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     additionalSegment = SnakeSegment()
     additionalSegment.position = snakePositions[0]
     additionalSegment.name = "snakeBody"
-    additionalSegment.physicsBody = SKPhysicsBody(rectangleOf: additionalSegment.size)
-    //    additionalSegment.physicsBody?.isDynamic = false
-    additionalSegment.physicsBody?.linearDamping = 0
     completeSnake.allSegments.append(additionalSegment)
     addChild(completeSnake.allSegments.last!)
   }
@@ -144,6 +129,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   //MARK: - Game Creation
   func startNewGame() {
     food.countActive = 0
+    snake.speedMultiplier = 1
     isGameOver = false
     removeAllChildren()
     addScoreLabel()
@@ -165,6 +151,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       if touchedNode.name == "New Game" {
         score = 0
         startNewGame()
+      }
+      if touchedNode.name == "High Scores" {
+        print(score)
+        print("Showing top scores")
+        // Present Top Scores View Controller
       }
     }
   }
@@ -202,15 +193,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func collisionBetween(hungrySnake: SKNode, object: SKNode) {
     if object.name == "food" {
       food.eatFood()
-//      snake.speedMultiplier += 0.15
+      snake.speedMultiplier += 0.15
       score += 20
       extendSnake()
       makeFood()
-    } else if object.name == "gameBoard"  {
+    } else if object.name == "border"  {
+      highScores.topTen.append(score)
       endGame()
+      print("poop")
     }
   }
-  
   func didBegin(_ contact: SKPhysicsContact) {
     if contact.bodyA.node!.name == "snake" {
       collisionBetween(hungrySnake: contact.bodyA.node!, object: contact.bodyB.node!)
@@ -219,13 +211,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
   }
   
+
   
-  // TODO: - Create End Game Method
+  // MARK: - End Game Method
   func endGame() {
     guard let scene = scene else { return }
-    snake.physicsBody?.isDynamic = false
     timer?.invalidate()
     isGameOver = true
+//    food.removeFromParent()
+    scene.removeAllChildren()
+//    for _ in completeSnake.allSegments {
+//      additionalSegment.removeFromParent()
+//    }
+
     
     // Game Over Label
     gameOverLabel.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.height / 2 + 50)
@@ -236,9 +234,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     finalScoreLabel.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.height / 2)
     addChild(finalScoreLabel)
     
+    // New Game Label / Button
     newGameLabel.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.height / 2 - 50)
     addChild(newGameLabel)
-    // TODO: - add button to show high scores
+    
+    // TODO: - add button to show high scores from user Defaults
+    // High Scores Label / Button
+    topScoresLabel.position = CGPoint(x: scene.frame.width / 2, y: scene.frame.height / 2 - 100)
+    addChild(topScoresLabel)
     
   }
   
@@ -261,4 +264,5 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
 }
+
 

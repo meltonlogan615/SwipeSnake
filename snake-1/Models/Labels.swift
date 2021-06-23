@@ -10,12 +10,13 @@ import SpriteKit
 
 class Labels: SKLabelNode {
   var fontFamily: String = "Courier"
-  var zIndex:     CGFloat = 2
+//  var zIndex:     CGFloat = SnakeWorldObjects.labels.rawVal
   
   override init() {
     super.init()
     self.fontName = fontFamily
     self.horizontalAlignmentMode = .center
+    self.zPosition = SnakeWorldObjects.labels.rawValue
   }
   
   required init?(coder aDecoder: NSCoder) {
@@ -23,6 +24,7 @@ class Labels: SKLabelNode {
   }
 }
 
+//MARK: - End of Game Labels
 class GameOver: Labels {
   override init() {
     super.init()
@@ -56,15 +58,30 @@ class NewGame: Labels {
   }
 }
 
-class Score: Labels {
+class TopScores: Labels {
   override init() {
     super.init()
-    self.text = "Score: 0"
-    self.fontSize = 16
-    self.horizontalAlignmentMode = .left
-    self.position = CGPoint(x: 12, y: 55)
+    self.text = "High Scores"
+    self.name = "High Scores"
+    fontSize = 24
   }
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 }
+
+//MARK: - Score Label in bottom left corner
+class Score: Labels {
+  override init() {
+    super.init()
+    self.text = "Score: 0"
+    self.fontSize = 24
+    self.horizontalAlignmentMode = .left
+    self.position = CGPoint(x: 12, y: 24)
+  }
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+}
+
+

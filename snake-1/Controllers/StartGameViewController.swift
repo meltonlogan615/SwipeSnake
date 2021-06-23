@@ -31,7 +31,8 @@ class StartGameViewController: UIViewController {
   }
   
   @IBAction func startGameButtonPressed(_ sender: UIButton) {
-    
+    let gameVC = storyboard?.instantiateViewController(withIdentifier: "GameViewController") as! GameViewController
+    navigationController?.pushViewController(gameVC, animated: true)
   }
   
 }
